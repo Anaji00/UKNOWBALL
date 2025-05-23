@@ -5,11 +5,11 @@ from sklearn.preprocessing import OneHotEncoder
 from xgboost import XGBRegressor
 import joblib
 
-df = pd.read_csv("data/updatedPlayerStats.csv")
-df["gameDate"] = pd.to_datetime(df["gameDate"])
-df["playerIdentifier"] = df["firstName"] + " " + df["lastName"]
+# Now we pass df from outside instead of reading a file here
+def create_features(player_name, df, num_games=150):
+    df["gameDate"] = pd.to_datetime(df["gameDate"])
+    df["playerIdentifier"] = df["firstName"] + " " + df["lastName"]
 
-def create_features(player_name, num_games=150):
     player_data = df[df["playerIdentifier"] == player_name].sort_values("gameDate").tail(num_games).copy()
 
     encoder = OneHotEncoder(sparse_output=False, handle_unknown='ignore')
@@ -22,6 +22,7 @@ def create_features(player_name, num_games=150):
         player_data[f"{stat}_avg5"] = player_data[stat].rolling(5).mean()
         player_data[f"{stat}_avg10"] = player_data[stat].shift(1).rolling(10).mean()
         player_data[f"{stat}_avg30"] = player_data[stat].shift(1).rolling(30).mean()
+
     player_data["PER"] = (
         player_data["points"] + player_data["reboundsTotal"] + player_data["assists"] +
         player_data["steals"] + player_data["blocks"] - player_data["turnovers"]
@@ -29,15 +30,16 @@ def create_features(player_name, num_games=150):
 
     base_features = [
         "fieldGoalsAttempted", "freeThrowsAttempted",
-        "numMinutes", "fieldGoalsPercentage", "freeThrowsPercentage","fieldGoalsMade", "freeThrowsMade",
+        "numMinutes", "fieldGoalsPercentage", "freeThrowsPercentage", "fieldGoalsMade", "freeThrowsMade",
         "steals", "blocks", "turnovers", "threePointersMade",
         "home", "win", "plusMinusPoints",
         "points_avg3", "assists_avg3", "reboundsTotal_avg3",
-        "points_avg5", "assists_avg5", "reboundsTotal_avg5", "PER", "threePointersPercentage", "reboundsTotal_avg10", "assists_avg10", "points_avg10",
+        "points_avg5", "assists_avg5", "reboundsTotal_avg5", "PER", "threePointersPercentage",
+        "reboundsTotal_avg10", "assists_avg10", "points_avg10",
     ]
 
-
     full_df = pd.concat([player_data[base_features], opponent_df], axis=1).dropna()
+
     X = full_df.values
     y_points = player_data.loc[full_df.index, "points"].values
     y_assists = player_data.loc[full_df.index, "assists"].values
@@ -46,8 +48,8 @@ def create_features(player_name, num_games=150):
 
     return X, y_points, y_assists, y_rebounds, game_dates
 
-def predict_next_games(player_name, num_games=5, save_models=True):
-    X, y_points, y_assists, y_rebounds, game_dates = create_features(player_name)
+def predict_next_games(player_name, df, num_games=5, save_models=True):
+    X, y_points, y_assists, y_rebounds, game_dates = create_features(player_name, df)
 
     X_train = X[:-num_games]
     X_test = X[-num_games:]
