@@ -8,7 +8,6 @@ import pandas as pd
 import numpy as np
 import joblib
 
-
 def build_mlp(input_dim, output_dim):
     model = Sequential([
         Input(shape=(input_dim,)),
@@ -22,8 +21,9 @@ def build_mlp(input_dim, output_dim):
     model.compile(optimizer='adam', loss='mse')
     return model
 
-def predict_next_games_mlp(player_name, num_games=5, save_models=True):
-    X, y_points, y_assists, y_rebounds, game_dates = create_features(player_name)
+def predict_next_games_mlp(player_name, df, num_games=5, save_models=True):
+    # 🆕 Pass df to create_features
+    X, y_points, y_assists, y_rebounds, game_dates = create_features(player_name, df)
 
     # Prepare targets
     y_all = np.stack([y_points, y_assists, y_rebounds], axis=1)
@@ -39,7 +39,7 @@ def predict_next_games_mlp(player_name, num_games=5, save_models=True):
     X_train_scaled = x_scaler.fit_transform(X_train)
     X_test_scaled = x_scaler.transform(X_test)
     y_train_scaled = y_scaler.fit_transform(y_train)
-    
+
     # Build and train MLP
     mlp = build_mlp(X.shape[1], output_dim=y_all.shape[1])
     mlp.fit(X_train_scaled, y_train_scaled, epochs=100, batch_size=64,
@@ -49,16 +49,13 @@ def predict_next_games_mlp(player_name, num_games=5, save_models=True):
     y_pred_scaled = mlp.predict(X_test_scaled)
     y_pred = y_scaler.inverse_transform(y_pred_scaled)
 
-    # Save model
+    # Save model and scalers
     if save_models:
         mlp.save(f"{player_name}_mlp.h5")
         joblib.dump(x_scaler, f"{player_name}_x_scaler.pkl")
         joblib.dump(y_scaler, f"{player_name}_y_scaler.pkl")
 
-    # Sanity check
-    print("💡 Sanity check (points):", list(zip(y_test[:, 0], y_pred[:, 0])))
-
-    # Output
+    # Output prediction DataFrame
     df_pred = pd.DataFrame({
         "points": y_pred[:, 0],
         "assists": y_pred[:, 1],
