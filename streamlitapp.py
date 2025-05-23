@@ -28,11 +28,11 @@ except Exception as e:
     st.stop()
 
 # ✅ Safely use personId as identifier
-if "personId" not in df.columns:
+if "personid" not in df.columns:
     st.error("❌ Column 'personId' not found in the dataset.")
     st.stop()
 
-df["playerIdentifier"] = df["personId"]
+df["playerIdentifier"] = df["personid"]
 player_list = sorted(df["playerIdentifier"].unique())
 
 # === UI selections
