@@ -4,27 +4,38 @@ import numpy as np
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 import sys
 import os
+
+# Include model paths
 sys.path.append(os.path.join(os.path.dirname(__file__), "models"))
 
+# Import custom model utilities
 from player_model_utils_xgb import predict_next_games as predict_with_xgb
 from player_model_utils_mlp import predict_next_games_mlp
 from player_model_utils import create_features
-
-
 
 # Streamlit config
 st.set_page_config(page_title="🏀 Player Performance Predictor", page_icon="🏀")
 st.title("🏀 Player Performance Predictor \n(Alessio Naji-Sepasgozar)")
 
-# Load player names
-df = pd.read_csv("data/updatedPlayerStats.csv")
+# === Load player stats from Google Drive ===
+# 🔁 Replace this ID with your actual Google Drive file ID
+file_id = '1B_mrKhMBYfmhiLhsjz7-A1QJojWe_uIC'  # ← paste your actual file ID here
+gdrive_url = f'https://drive.google.com/uc?id={file_id}'
+
+try:
+    df = pd.read_csv(gdrive_url)
+except Exception as e:
+    st.error(f"❌ Failed to load player stats from Google Drive: {e}")
+    st.stop()
+
 df["playerIdentifier"] = df["firstName"] + " " + df["lastName"]
 player_list = sorted(df["playerIdentifier"].unique())
 
+# UI selections
 player_name = st.selectbox("Select a player:", player_list)
 model_choice = st.radio("Select model:", ["XGBoost", "MLP"], horizontal=True)
 
-# Display metrics
+# === Display prediction metrics ===
 def show_stat_metrics(label, y_true, y_pred):
     mae = mean_absolute_error(y_true, y_pred)
     mse = mean_squared_error(y_true, y_pred)
@@ -37,7 +48,7 @@ def show_stat_metrics(label, y_true, y_pred):
     - 🎯 **R² Score**: `{r2:.8f}`
     """)
 
-# Predict
+# === Run prediction on button click ===
 if st.button("Predict Player Performance"):
     try:
         st.info(f"🔮 Predicting next 5 games using **{model_choice}**...")
@@ -48,7 +59,6 @@ if st.button("Predict Player Performance"):
 
         if isinstance(preds_df, pd.DataFrame):
             st.subheader(f"📊 Predicted Stats for {player_name} (Next 5 Games)")
-
             for i, (game_date, row) in enumerate(preds_df.iterrows(), 1):
                 st.markdown(f"""
                 #### 🗓️ Game on {game_date.date()}
@@ -64,4 +74,4 @@ if st.button("Predict Player Performance"):
             show_stat_metrics("Rebounds", y_true["rebounds"], preds_df["rebounds"].values)
 
     except Exception as e:
-        st.error(f"❌ Error: {e}")
+        st.error(f"❌ Error during prediction: {e}")
