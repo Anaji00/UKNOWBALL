@@ -27,8 +27,13 @@ except Exception as e:
     st.error(f"❌ Failed to load player stats from Google Drive: {e}")
     st.stop()
 
+expected_columns = {"firstName", "lastName"}
+if not expected_columns.issubset(df.columns):
+    st.error(f"❌ Required columns missing: {expected_columns - set(df.columns)}")
+    st.stop()
+
 df["playerIdentifier"] = df["firstName"] + " " + df["lastName"]
-player_list = sorted(df["playerIdentifier"].unique())
+
 
 # UI selections
 player_name = st.selectbox("Select a player:", player_list)
