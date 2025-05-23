@@ -8,3 +8,4 @@ matplotlib
 seaborn
 tensorflow
 joblib
+numpy<2.0
