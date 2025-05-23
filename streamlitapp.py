@@ -18,8 +18,7 @@ st.set_page_config(page_title="🏀 Player Performance Predictor", page_icon="�
 st.title("🏀 Player Performance Predictor \n(Alessio Naji-Sepasgozar)")
 
 # === Load player stats from Google Drive ===
-# 🔁 Replace this ID with your actual Google Drive file ID
-file_id = '1B_mrKhMBYfmhiLhsjz7-A1QJojWe_uIC'  # ← paste your actual file ID here
+file_id = '1B_mrKhMBYfmhiLhsjz7-A1QJojWe_uIC'  # ← Your actual file ID here
 gdrive_url = f'https://drive.google.com/uc?id={file_id}'
 
 try:
@@ -52,10 +51,12 @@ def show_stat_metrics(label, y_true, y_pred):
 if st.button("Predict Player Performance"):
     try:
         st.info(f"🔮 Predicting next 5 games using **{model_choice}**...")
+
+        # 🆕 Pass `df` to the models now
         if model_choice == "XGBoost":
-            preds_df, y_true = predict_with_xgb(player_name, num_games=5)
+            preds_df, y_true = predict_with_xgb(player_name, df=df, num_games=5)
         else:
-            preds_df, y_true = predict_next_games_mlp(player_name, num_games=5)
+            preds_df, y_true = predict_next_games_mlp(player_name, df=df, num_games=5)
 
         if isinstance(preds_df, pd.DataFrame):
             st.subheader(f"📊 Predicted Stats for {player_name} (Next 5 Games)")
