@@ -6,5 +6,5 @@ xgboost
 lightgbm
 matplotlib
 seaborn
-tensorflow
+tensorflow-cpu
 joblib
