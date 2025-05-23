@@ -18,22 +18,28 @@ st.set_page_config(page_title="🏀 Player Performance Predictor", page_icon="�
 st.title("🏀 Player Performance Predictor \n(Alessio Naji-Sepasgozar)")
 
 # === Load player stats from Google Drive ===
-file_id = '1B_mrKhMBYfmhiLhsjz7-A1QJojWe_uIC'  # ← Your actual file ID here
+file_id = '1B_mrKhMBYfmhiLhsjz7-A1QJojWe_uIC'
 gdrive_url = f'https://drive.google.com/uc?id={file_id}'
 
+try:
+    df = pd.read_csv(gdrive_url)
+except Exception as e:
+    st.error(f"❌ Failed to load data from Google Drive: {e}")
+    st.stop()
+
+# ✅ Safely use personId as identifier
 if "personId" not in df.columns:
     st.error("❌ Column 'personId' not found in the dataset.")
     st.stop()
 
 df["playerIdentifier"] = df["personId"]
+player_list = sorted(df["playerIdentifier"].unique())
 
-
-
-# UI selections
+# === UI selections
 player_name = st.selectbox("Select a player:", player_list)
 model_choice = st.radio("Select model:", ["XGBoost", "MLP"], horizontal=True)
 
-# === Display prediction metrics ===
+# === Display prediction metrics
 def show_stat_metrics(label, y_true, y_pred):
     mae = mean_absolute_error(y_true, y_pred)
     mse = mean_squared_error(y_true, y_pred)
@@ -46,12 +52,11 @@ def show_stat_metrics(label, y_true, y_pred):
     - 🎯 **R² Score**: `{r2:.8f}`
     """)
 
-# === Run prediction on button click ===
+# === Run prediction
 if st.button("Predict Player Performance"):
     try:
         st.info(f"🔮 Predicting next 5 games using **{model_choice}**...")
 
-        # 🆕 Pass `df` to the models now
         if model_choice == "XGBoost":
             preds_df, y_true = predict_with_xgb(player_name, df=df, num_games=5)
         else:
