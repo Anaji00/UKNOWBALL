@@ -21,18 +21,12 @@ st.title("🏀 Player Performance Predictor \n(Alessio Naji-Sepasgozar)")
 file_id = '1B_mrKhMBYfmhiLhsjz7-A1QJojWe_uIC'  # ← Your actual file ID here
 gdrive_url = f'https://drive.google.com/uc?id={file_id}'
 
-try:
-    df = pd.read_csv(gdrive_url)
-except Exception as e:
-    st.error(f"❌ Failed to load player stats from Google Drive: {e}")
+if "personId" not in df.columns:
+    st.error("❌ Column 'personId' not found in the dataset.")
     st.stop()
 
-expected_columns = {"firstName", "lastName"}
-if not expected_columns.issubset(df.columns):
-    st.error(f"❌ Required columns missing: {expected_columns - set(df.columns)}")
-    st.stop()
+df["playerIdentifier"] = df["personId"]
 
-df["playerIdentifier"] = df["firstName"] + " " + df["lastName"]
 
 
 # UI selections
