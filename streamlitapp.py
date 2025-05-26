@@ -44,6 +44,8 @@ if "firstname" not in df.columns or "lastname" not in df.columns:
 # Use first and last name as identifier
 df["playerIdentifier"] = df["firstname"] + " " + df["lastname"]
 
+player_list = sorted(df["playerIdentifier"].unique())
+
 # === UI selections
 player_name = st.selectbox("Select a player:", player_list)
 model_choice = st.radio("Select model:", ["XGBoost", "MLP"], horizontal=True)
