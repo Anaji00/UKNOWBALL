@@ -4,7 +4,6 @@ import numpy as np
 from sklearn.preprocessing import OneHotEncoder
 from xgboost import XGBRegressor
 import joblib
-print("📋 Model columns:", df.columns.tolist())
 
 # Now we pass df from outside instead of reading a file here
 def create_features(player_name, df, num_games=150):
