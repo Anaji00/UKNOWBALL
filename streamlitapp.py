@@ -33,7 +33,7 @@ df = load_large_csv_from_drive()
 
 
 # Normalize column names to avoid case/space/BOM issues
-df.columns = df.columns.str.strip().str.lower()
+df.columns = df.columns.str.strip()
 
 # Check if both columns are present
 if "firstname" not in df.columns or "lastname" not in df.columns:
