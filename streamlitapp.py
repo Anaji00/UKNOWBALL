@@ -37,13 +37,13 @@ df.columns = df.columns.str.strip()
 st.write("📋 Columns passed to model:", df.columns.tolist())
 
 # Check if both columns are present
-if "firstname" not in df.columns or "lastname" not in df.columns:
+if "firstName" not in df.columns or "lastName" not in df.columns:
     st.error(f"❌ Required columns missing: 'firstname' and/or 'lastname'")
     st.write("📋 Found columns:", df.columns.tolist())
     st.stop()
 
 # Use first and last name as identifier
-df["playerIdentifier"] = df["firstname"] + " " + df["lastname"]
+df["playerIdentifier"] = df["firstName"] + " " + df["lastName"]
 
 player_list = sorted(df["playerIdentifier"].unique())
 
