@@ -34,7 +34,6 @@ df = load_large_csv_from_drive()
 
 # Normalize column names to avoid case/space/BOM issues
 df.columns = df.columns.str.strip()
-st.write("📋 Columns passed to model:", df.columns.tolist())
 
 # Check if both columns are present
 if "firstName" not in df.columns or "lastName" not in df.columns:
