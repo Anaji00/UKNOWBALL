@@ -23,13 +23,16 @@ gdrive_url = f'https://drive.google.com/uc?id={file_id}'
 
 try:
     df = pd.read_csv(gdrive_url)
+    st.write("✅ Loaded columns:", df.columns.tolist())
+    st.write("📄 Sample data:")
+    st.write(df.head())
 except Exception as e:
-    st.error(f"❌ Failed to load data from Google Drive: {e}")
+    st.error(f"❌ Failed to load data: {e}")
     st.stop()
 
-# ✅ Safely use personId as identifier
-if "personid" not in df.columns:
-    st.error("❌ Column 'personId' not found in the dataset.")
+if "personId" not in df.columns:
+    st.error("❌ Column 'personId' NOT found — here’s what was found instead:")
+    st.write(df.columns.tolist())
     st.stop()
 
 df["playerIdentifier"] = df["personid"]
