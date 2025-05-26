@@ -32,8 +32,17 @@ def load_large_csv_from_drive():
 df = load_large_csv_from_drive()
 
 
-df["playerIdentifier"] = df["personid"]
-player_list = sorted(df["playerIdentifier"].unique())
+# Normalize column names to avoid case/space/BOM issues
+df.columns = df.columns.str.strip().str.lower()
+
+# Check if both columns are present
+if "firstname" not in df.columns or "lastname" not in df.columns:
+    st.error(f"❌ Required columns missing: 'firstname' and/or 'lastname'")
+    st.write("📋 Found columns:", df.columns.tolist())
+    st.stop()
+
+# Use first and last name as identifier
+df["playerIdentifier"] = df["firstname"] + " " + df["lastname"]
 
 # === UI selections
 player_name = st.selectbox("Select a player:", player_list)
