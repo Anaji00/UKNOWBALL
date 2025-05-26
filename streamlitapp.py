@@ -18,22 +18,19 @@ st.set_page_config(page_title="🏀 Player Performance Predictor", page_icon="�
 st.title("🏀 Player Performance Predictor \n(Alessio Naji-Sepasgozar)")
 
 # === Load player stats from Google Drive ===
-file_id = '1B_mrKhMBYfmhiLhsjz7-A1QJojWe_uIC'
-gdrive_url = f'https://drive.google.com/uc?id={file_id}'
+import gdown
 
-try:
-    df = pd.read_csv(gdrive_url)
-    st.write("✅ Loaded columns:", df.columns.tolist())
-    st.write("📄 Sample data:")
-    st.write(df.head())
-except Exception as e:
-    st.error(f"❌ Failed to load data: {e}")
-    st.stop()
+# Only download once and cache
+@st.cache_data
+def load_large_csv_from_drive():
+    url = "https://drive.google.com/uc?id=1B_mrKhMBYfmhiLhsjz7-A1QJojWe_uIC"
+    output_path = "/tmp/updatedPlayerStats.csv"
+    gdown.download(url, output_path, quiet=False)
+    df = pd.read_csv(output_path)
+    return df
 
-if "personId" not in df.columns:
-    st.error("❌ Column 'personId' NOT found — here’s what was found instead:")
-    st.write(df.columns.tolist())
-    st.stop()
+df = load_large_csv_from_drive()
+
 
 df["playerIdentifier"] = df["personid"]
 player_list = sorted(df["playerIdentifier"].unique())
